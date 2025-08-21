@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuria.ai</title>
+    <meta name="description" content="Explore Federal Transit Administration grant data using AI-powered search">
+    
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Dark Mode Toggle - Positioned absolute -->
+    <button class="dark-toggle-floating" id="darkToggle">
+        <i data-lucide="moon" id="darkIcon"></i>
+    </button>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Initial State -->
+        <div class="initial-state" id="initialState">
+            <div class="hero-icon">
+                N
+            </div>
+            <h2 class="hero-title">Nuria</h2>
+            <p class="hero-description">
+                Explore Federal Transit Administration grant data
+            </p>
+            
+            <!-- Search Input -->
+            <div class="search-container">
+                <div class="search-input">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Ask about FTA grants..."
+                        autocomplete="off"
+                    >
+                    <button class="search-button" id="searchButton">
+                        <i data-lucide="send"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Example Queries -->
+            <div class="suggestions" id="suggestions">
+                <p class="suggestions-title">Get your grant search rolling with these examples</p>
+                <button class="suggestion-button" data-query="Show me grants for bus rapid transit projects in 2023">
+                    Show me grants for bus rapid transit projects in 2023
+                </button>
+                <button class="suggestion-button" data-query="Which organizations received the most FTA funding?">
+                    Which organizations received the most FTA funding?
+                </button>
+                <button class="suggestion-button" data-query="Show grants for electric vehicle infrastructure">
+                    Show grants for electric vehicle infrastructure
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area" id="chatArea">
+            <div id="messages"></div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <span class="loading-text">Searching grants...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fixed Bottom Input -->
+    <div class="bottom-input" id="bottomInput">
+        <div class="bottom-input-container">
+            <div class="bottom-search-input">
+                <input 
+                    type="text" 
+                    id="bottomSearchInput" 
+                    placeholder="Ask another question about FTA grants..."
+                    autocomplete="off"
+                >
+                <button class="search-button" id="bottomSearchButton">
+                    <i data-lucide="send"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GitHub Link -->
+    <a href="https://github.com/levimccollum/nuria" target="_blank" class="github-link" aria-label="View on GitHub">
+        <i data-lucide="github"></i>
+    </a>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
