@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuria.ai</title>
-    <meta name="description" content="Explore Federal Transit Administration grant data using AI-powered search">
+    <title>FTA Grant Database</title>
+    <meta name="description" content="Search and explore 2,000+ Federal Transit Administration grant awards. Filter by organization, program, funding amount, and year.">
     
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +13,9 @@
     
     <!-- Lucide Icons -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
@@ -28,11 +31,11 @@
         <!-- Initial State -->
         <div class="initial-state" id="initialState">
             <div class="hero-icon">
-                N
+                F
             </div>
-            <h2 class="hero-title">Nuria</h2>
+            <h2 class="hero-title">FTA Grant Database</h2>
             <p class="hero-description">
-                Explore Federal Transit Administration grant data
+                Search 2,000+ Federal Transit Administration grant awards
             </p>
             
             <!-- Search Input -->
@@ -41,64 +44,196 @@
                     <input 
                         type="text" 
                         id="searchInput" 
-                        placeholder="Ask about FTA grants..."
+                        placeholder="Search FTA grant awards"
                         autocomplete="off"
                     >
+                    <button class="filter-button-inline" id="filterButton">
+                        <i data-lucide="sliders-horizontal"></i>
+                    </button>
                     <button class="search-button" id="searchButton">
-                        <i data-lucide="send"></i>
+                        <i data-lucide="search"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Example Queries -->
             <div class="suggestions" id="suggestions">
-                <p class="suggestions-title">Get your grant search rolling with these examples</p>
-                <button class="suggestion-button" data-query="Show me grants for bus rapid transit projects in 2023">
-                    Show me grants for bus rapid transit projects in 2023
+                <p class="suggestions-title">Try these examples</p>
+                <button class="suggestion-button" data-query="electric buses">
+                    electric buses
                 </button>
-                <button class="suggestion-button" data-query="Which organizations received the most FTA funding?">
-                    Which organizations received the most FTA funding?
+                <button class="suggestion-button" data-query="accessibility improvements">
+                    accessibility improvements
                 </button>
-                <button class="suggestion-button" data-query="Show grants for electric vehicle infrastructure">
-                    Show grants for electric vehicle infrastructure
+                <button class="suggestion-button" data-query="bus rapid transit">
+                    bus rapid transit
                 </button>
             </div>
         </div>
 
-        <!-- Chat Area -->
-        <div class="chat-area" id="chatArea">
-            <div id="messages"></div>
+        <!-- Results Area -->
+        <div class="results-area" id="resultsArea">
+            <!-- Export and Results Info -->
+            <div class="results-header" id="resultsHeader">
+                <div class="results-left">
+                    <button class="back-button" id="backButton">
+                        <i data-lucide="search"></i>
+                        New Search
+                    </button>
+                </div>
+                <div class="results-right">
+                    <span class="results-info" id="resultsCount"></span>
+                    <button class="export-button" id="exportButton">
+                        <i data-lucide="download"></i>
+                        Download
+                    </button>
+                </div>
+            </div>
             
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <span class="loading-text">Searching grants...</span>
+            <!-- Grant Cards Container -->
+            <div class="grants-container" id="grantsContainer">
+                <!-- Grant cards will be dynamically inserted here -->
+            </div>
+            
+            <!-- Move these to bottom center -->
+            <div class="bottom-info">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Loading grants...</span>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Fixed Bottom Input -->
-    <div class="bottom-input" id="bottomInput">
-        <div class="bottom-input-container">
-            <div class="bottom-search-input">
-                <input 
-                    type="text" 
-                    id="bottomSearchInput" 
-                    placeholder="Ask another question about FTA grants..."
-                    autocomplete="off"
-                >
-                <button class="search-button" id="bottomSearchButton">
-                    <i data-lucide="send"></i>
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- GitHub Link -->
-    <a href="https://github.com/levimccollum/nuria" target="_blank" class="github-link" aria-label="View on GitHub">
+    <a href="https://github.com/levimccollum/fta-grants" target="_blank" class="github-link" aria-label="View on GitHub">
         <i data-lucide="github"></i>
     </a>
 
     <!-- JavaScript -->
     <script src="script.js"></script>
+
+    <!-- Grant Detail Modal -->
+    <div class="modal-overlay" id="grantModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Grant Details</h2>
+                <button class="modal-close" id="modalClose">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>Project Sponsor:</label>
+                    <span id="modalSponsor"></span>
+                </div>
+                <div class="modal-field">
+                    <label>Grant Program:</label>
+                    <span id="modalProgram"></span>
+                </div>
+                <div class="modal-field">
+                    <label>Fiscal Year:</label>
+                    <span id="modalYear"></span>
+                </div>
+                <div class="modal-field">
+                    <label>Opportunity ID:</label>
+                    <span id="modalId"></span>
+                </div>
+                <div class="modal-field">
+                    <label>Funding Amount:</label>
+                    <span id="modalFunding"></span>
+                </div>
+                <div class="modal-field full-width">
+                    <label>Project Description:</label>
+                    <p id="modalDescription"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div class="modal-overlay" id="filterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Advanced Search</h2>
+                <button class="modal-close" id="filterModalClose">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-group">
+                    <label>Years</label>
+                    <div class="pill-filters" id="yearPills">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Programs</label>
+                    <div class="pill-filters" id="programPills">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="fundingFilter">Funding Amount</label>
+                    <div class="funding-range">
+                        <input type="number" id="fundingMin" placeholder="Min" min="0">
+                        <span class="range-separator">to</span>
+                        <input type="number" id="fundingMax" placeholder="Max" min="0">
+                    </div>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="clear-filters-btn" id="clearFiltersBtn">
+                        <i data-lucide="x-circle"></i>
+                        Clear
+                    </button>
+                    <button class="apply-filters-btn" id="applyFiltersBtn">
+                        <i data-lucide="check"></i>
+                        Apply
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Capture Modal -->
+    <div class="modal-overlay" id="emailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Download Grant Data</h2>
+                <button class="modal-close" id="emailModalClose">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 20px;">
+                    Enter your email address to download the CSV file.
+                </p>
+                
+                <form id="emailForm">
+                    <div class="email-input-group">
+                        <label for="emailInput">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="emailInput" 
+                            placeholder="your@email.com" 
+                            required
+                        >
+                    </div>
+                    
+                    <div class="email-actions">
+                        <button type="button" class="cancel-download-btn" id="cancelDownloadBtn">
+                            Cancel
+                        </button>
+                        <button type="submit" class="download-csv-btn" id="downloadCsvBtn">
+                            <i data-lucide="download"></i>
+                            Download
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
